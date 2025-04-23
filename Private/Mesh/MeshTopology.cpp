@@ -10,53 +10,6 @@
 using namespace GS;
 
 
-void PackedIntLists::Initialize(int NumListIDs, int ListSizeEstimate, size_t KnownExactTotalListItems)
-{
-	ListPointers.initialize(NumListIDs, -1);
-	PackedLists.resize(0);
-	if (KnownExactTotalListItems > 0)
-		PackedLists.reserve(KnownExactTotalListItems + (size_t)NumListIDs);
-	else if (ListSizeEstimate > 0)
-		PackedLists.reserve(NumListIDs * (ListSizeEstimate+1));
-}
-
-bool PackedIntLists::AppendList(int ListID, int NumItems, const int* Items)
-{
-	gs_debug_assert(ListPointers[ListID] == -1);
-	if (ListPointers[ListID] != -1)
-		return false;
-	if (NumItems == 0 || Items == nullptr)
-		return false;
-
-	PackedLists.reserve(PackedLists.size() + NumItems + 1);
-	ListPointers[ListID] = (int)PackedLists.size();
-	PackedLists.add(NumItems); 
-	for (int k = 0; k < NumItems; ++k)
-		PackedLists.add(Items[k]);
-
-	return true;
-}
-
-int PackedIntLists::AppendList(int NumItems, const int* Items)
-{
-	if (NumItems == 0 || Items == nullptr)
-		return -1;
-	int NewListID = (int)ListPointers.add(-1);
-	AppendList(NewListID, NumItems, Items);
-	return (int)NewListID;
-}
-
-
-const_buffer_view<int> PackedIntLists::GetListView(int ListID) const
-{
-	int ListIndex = ListPointers[ListID];
-	if (ListIndex < 0)
-		return const_buffer_view<int>();
-	const int* ptr = PackedLists.raw_pointer(ListIndex);
-	return const_buffer_view<int>(ptr + 1, ptr[0]);
-}
-
-
 
 
 namespace GS
@@ -94,7 +47,7 @@ namespace GS
 		int NumVertexIDs, 
 		dynamic_buffer<InlineIndexList>& VertTriSets,
 		size_t TotalVertTriCount,
-		PackedIntLists& VertexTriangles)
+		packed_int_lists& VertexTriangles)
 	{
 		VertexTriangles.Initialize(NumVertexIDs, 0, TotalVertTriCount);
 		for (int VertexID = 0; VertexID < NumVertexIDs; ++VertexID) {
@@ -107,9 +60,9 @@ namespace GS
 	// build per-vertex triangle-one-rings from edges information
 	void BuildVertexTriangles(
 		int NumVertexIDs,
-		const PackedIntLists& VertexEdges,
+		const packed_int_lists& VertexEdges,
 		const unsafe_vector<MeshTopology::Edge>& Edges,
-		PackedIntLists& VertexTriangles)
+		packed_int_lists& VertexTriangles)
 	{
 		VertexTriangles.Initialize(NumVertexIDs, 0, VertexEdges.NumListElements());
 		unsafe_vector<int> OneRingTrisTmp;
@@ -149,7 +102,7 @@ namespace GS
 		int NumVertexIDs, 
 		FunctionRef<bool(int TriangleID, Index3i& TriVertices)> GetTriangleFunc,
 		const dynamic_buffer<InlineIndexList>& VertTriSets, 
-		PackedIntLists& VertexVertices, 
+		packed_int_lists& VertexVertices,
 		size_t VertTriCountHint)
 	{
 		VertexVertices.Initialize(NumVertexIDs, 0, VertTriCountHint);		// estimate is low if there are mesh borders...
@@ -182,9 +135,9 @@ namespace GS
 	// build per-vertex vertex-one-rings from edges information
 	void BuildVertexVertices(
 		int NumVertexIDs,
-		const PackedIntLists& VertexEdges,
+		const packed_int_lists& VertexEdges,
 		const unsafe_vector<MeshTopology::Edge>& Edges,
-		PackedIntLists& VertexVertices)
+		packed_int_lists& VertexVertices)
 	{
 		VertexVertices.Initialize(NumVertexIDs, 0, VertexEdges.NumListElements());
 		unsafe_vector<int> OneRingVertsTmp;
@@ -215,7 +168,7 @@ namespace GS
 		FunctionRef<bool(int TriangleID, Index3i& TriVertices)> GetTriangleFunc,
 		const MeshTopology& Topology,
 		unsafe_vector<Index3i>& TriNeighbours,
-		PackedIntLists& NonManifoldTriTriLists)
+		packed_int_lists& NonManifoldTriTriLists)
 	{
 		gs_debug_assert(Topology.HasVertexEdges());
 
@@ -261,7 +214,7 @@ namespace GS
 		unsafe_vector<InlineIndexList> VertEdgeSets;
 		VertEdgeSets.resize(NumVertexIDs);
 
-		// todo it would be nice to have a variant of PackedIntLists that is based on linkedlist...
+		// todo it would be nice to have a variant of packed_int_lists that is based on linkedlist...
 		unsafe_vector<InlineIndexList> NonManifoldTriLists;
 
 		// look up edge in VertexEdgeSets

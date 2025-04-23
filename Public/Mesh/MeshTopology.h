@@ -6,49 +6,10 @@
 #include "Math/GSIndex2.h"
 #include "Math/GSIndex3.h"
 #include "Core/FunctionRef.h"
+#include "Core/packed_int_lists.h"
 
 namespace GS
 {
-
-class GRADIENTSPACECORE_API PackedIntLists
-{
-public:
-	// indices into PackedLists
-	unsafe_vector<int> ListPointers;
-	// sequential packed lists, each list starts with list size and then elements
-	unsafe_vector<int> PackedLists;
-
-	int NumLists() const { return (int)ListPointers.size(); }
-	int64_t NumListElements() const { return PackedLists.size(); }
-
-	//! initialize with a fixed number of known ListIDs
-	void Initialize(int NumListIDs, int ListSizeEstimate = 0, size_t KnownExactTotalListItems = 0);
-
-	//! append a (non-empty) list at a given ListID. returns false if ListID's list is non-empty, or on invalid input.
-	bool AppendList(int ListID, int NumItems, const int* Items);
-
-	//! append a (non-empty) list at a new ListID. returns new ListID, or -1 on invalid input.
-	int AppendList(int NumItems, const int* Items);
-
-	bool HasList(int ListID) const { return ListPointers[ListID] >= 0; }
-
-	int GetListSizeUnsafe(int ListID) const { 
-		return PackedLists[ListPointers[ListID]]; 
-	}
-	
-	const int* GetListItemsUnsafe(int ListID) const { 
-		return PackedLists.raw_pointer(ListPointers[ListID] + 1); 
-	}
-
-	const int* GetListItemsUnsafe(int ListID, int& SizeOut) const {
-		const int* ptr = PackedLists.raw_pointer(ListPointers[ListID]);
-		SizeOut = *ptr;
-		return (ptr + 1);
-	}
-
-	const_buffer_view<int> GetListView(int ListID) const;
-};
-
 
 
 
@@ -74,8 +35,8 @@ class GRADIENTSPACECORE_API MeshTopology
 
 
 public:
-	PackedIntLists VertexTriangles;
-	PackedIntLists VertexVertices;
+	packed_int_lists VertexTriangles;
+	packed_int_lists VertexVertices;
 	
 	struct Edge
 	{
@@ -84,11 +45,11 @@ public:
 		bool IsManifold() const { return TriInfo.A >= 0; }
 	};
 	unsafe_vector<Edge> Edges;
-	PackedIntLists VertexEdges;
-	PackedIntLists NonManifoldEdgeTriLists;
+	packed_int_lists VertexEdges;
+	packed_int_lists NonManifoldEdgeTriLists;
 
 	unsafe_vector<Index3i> TriNeighbours;
-	PackedIntLists NonManifoldTriTriLists;
+	packed_int_lists NonManifoldTriTriLists;
 
 public:
 	void Build(
