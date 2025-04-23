@@ -52,6 +52,8 @@ struct Frame3
 
 	ResultOrFail<Vector3<RealType>> FindRayPlaneIntersection(const Ray3<RealType>& Ray, int NormalAxisIndex) const;
 
+	void AlignAxis(int AxisIndex, const Vector3<RealType>& ToDirection);
+
 	// Unreal Engine casting/conversion
 #ifdef GS_ENABLE_UE_TYPE_COMPATIBILITY
 	explicit inline operator UE::Geometry::TFrame3<RealType>() const {
@@ -163,6 +165,15 @@ ResultOrFail<Vector3<RealType>> Frame3<RealType>::FindRayPlaneIntersection(const
 		return ResultOrFail<Vector3<RealType>>();
 	return Ray.PointAt(t);
 }
+
+
+template<typename RealType>
+void Frame3<RealType>::AlignAxis(int AxisIndex, const Vector3<RealType>& ToDirection)
+{
+	Quaterniond AlignRotation(GetAxis(AxisIndex), ToDirection.Normalized() );
+	this->Rotation = AlignRotation * Rotation;
+}
+
 
 
 

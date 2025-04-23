@@ -34,6 +34,11 @@ struct TTriVtxTuple
 	TTriVtxTuple(const ValueType& a, const ValueType& b, const ValueType& c) {
 		A = a; B = b; C = c;
 	}
+
+	template<typename ValueType2>
+	explicit TTriVtxTuple(const ValueType2& a, const ValueType2& b, const ValueType2& c) {
+		A = (ValueType)a; B = (ValueType)b; C = (ValueType)c;
+	}
 };
 typedef TTriVtxTuple<Vector3f> TriVtxNormals;
 typedef TTriVtxTuple<Vector2f> TriVtxUVs;

@@ -20,6 +20,10 @@ struct ResultOrFail
 	bool Invalid() const { return !bValid; }
 	operator bool() const { return bValid; }
 	operator ResultType() const { return Value; }
+
+	ResultType ValueOrDefault(const ResultType& DefaultValue) const {
+		return (bValid) ? Value : DefaultValue;
+	}
 };
 
 
