@@ -13,7 +13,6 @@ namespace GS
 /**
  * intended to be similar std::vector or TArray without the overhead
  * 
- * TODO: why are we storing m_storage as unsigned char* instead of ValueType* ?
  * TODO: for non-trivially-copyable, we default construct to m_allocated_length...does it make sense? could limit it to m_length but then every add/etc needs to do it...
  * TODO: may not be destructing properly in all cases (eg set_ref, remove, etc)
  */
@@ -21,7 +20,7 @@ template<typename ValueType>
 class unsafe_vector
 {
 private:
-	unsigned char* m_storage = nullptr;
+	ValueType* m_storage = nullptr;
 	size_t m_length = 0;
 	size_t m_allocated_length = 0;
 	gs_allocator* m_external_allocator = nullptr;
@@ -51,12 +50,12 @@ public:
 	template<typename IndexType>
 	ValueType& operator[](IndexType index) {
 		static_assert(std::is_integral_v<IndexType> == true);
-		return reinterpret_cast<ValueType*>(m_storage)[index];
+		return m_storage[index];
 	}
 	template<typename IndexType>
 	const ValueType& operator[](IndexType index) const {
 		static_assert(std::is_integral_v<IndexType> == true);
-		return reinterpret_cast<ValueType*>(m_storage)[index];
+		return m_storage[index];
 	}
 
 	ValueType& last();
@@ -71,6 +70,7 @@ public:
 	int64_t add_move(ValueType&& Element);
 	int64_t append(const ValueType* ElementPtr, size_t NumElements);
 	int64_t add_unique(const ValueType& Element);
+	int64_t set_at(ValueType Element, int index);	// will grow array so that index is valid
 
 	bool remove_at(int64_t Index);
 	bool swap_remove(int64_t Index, int64_t& SwappedIndexOut);
@@ -126,8 +126,8 @@ public:
 		ValueType* m_ptr;
 	};
 
-	iterator begin() { return iterator(reinterpret_cast<ValueType*>(m_storage)); }
-	iterator end() { return iterator(&reinterpret_cast<ValueType*>(m_storage)[m_length]); }
+	iterator begin() { return iterator(m_storage); }
+	iterator end() { return iterator(&m_storage[m_length]); }
 
 
 	struct const_iterator
@@ -190,7 +190,7 @@ template<typename ValueType>
 unsafe_vector<ValueType>& unsafe_vector<ValueType>::operator=(const unsafe_vector& copy)
 {
 	resize(copy.size());
-	memcpy(m_storage, copy.m_storage, m_length * sizeof(ValueType));
+	memcpy((void*)m_storage, (void*)copy.m_storage, m_length * sizeof(ValueType));
 	return *this;
 }
 
@@ -226,25 +226,25 @@ size_t unsafe_vector<ValueType>::allocated_size() const
 //template<typename ValueType>
 //ValueType& unsafe_vector<ValueType>::operator[](int index)
 //{
-//	return reinterpret_cast<ValueType*>(m_storage)[index];
+//	return m_storage[index];
 //}
 //
 //template<typename ValueType>
 //const ValueType& unsafe_vector<ValueType>::operator[](int index) const
 //{
-//	return reinterpret_cast<ValueType*>(m_storage)[index];
+//	return m_storage[index];
 //}
 
 template<typename ValueType>
 void unsafe_vector<ValueType>::set_ref(int index, const ValueType& NewValue)
 {
-	reinterpret_cast<ValueType*>(m_storage)[index] = NewValue;
+	m_storage[index] = NewValue;
 }
 
 template<typename ValueType>
 void unsafe_vector<ValueType>::set_move(int index, ValueType&& NewValue)
 {
-	reinterpret_cast<ValueType*>(m_storage)[index] = std::move(NewValue);
+	m_storage[index] = std::move(NewValue);
 }
 
 template<typename ValueType>
@@ -264,7 +264,7 @@ int64_t unsafe_vector<ValueType>::add(ValueType Element)
 {
 	apply_grow_policy(1);
 	int64_t new_index = m_length;
-	reinterpret_cast<ValueType*>(m_storage)[new_index] = std::move(Element);
+	m_storage[new_index] = std::move(Element);
 	m_length++;
 	return new_index;
 }
@@ -275,7 +275,7 @@ int64_t unsafe_vector<ValueType>::add_ref(const ValueType& Element)
 	ValueType NewElement = Element;
 	apply_grow_policy(1);
 	int64_t new_index = m_length;
-	reinterpret_cast<ValueType*>(m_storage)[new_index] = std::move(NewElement);
+	m_storage[new_index] = std::move(NewElement);
 	m_length++;
 	return new_index;
 }
@@ -285,7 +285,7 @@ int64_t unsafe_vector<ValueType>::add_move(ValueType&& Element)
 {
 	apply_grow_policy(1);
 	int64_t new_index = m_length;
-	reinterpret_cast<ValueType*>(m_storage)[new_index] = std::move(Element);
+	m_storage[new_index] = std::move(Element);
 	m_length++;
 	return new_index;
 }
@@ -297,7 +297,7 @@ int64_t unsafe_vector<ValueType>::append(const ValueType* ElementPtr, size_t Num
 	int64_t new_index = m_length;
 	for (size_t k = 0; k < NumElements; ++k)
 	{
-		reinterpret_cast<ValueType*>(m_storage)[m_length] = ElementPtr[k];
+		m_storage[m_length] = ElementPtr[k];
 		m_length++;
 	}
 	return new_index;
@@ -312,6 +312,18 @@ int64_t unsafe_vector<ValueType>::add_unique(const ValueType& Element)
 	return add_ref(Element);
 }
 
+template<typename ValueType>
+int64_t unsafe_vector<ValueType>::set_at(ValueType Element, int index)
+{
+	if (m_length <= index) {
+		apply_grow_policy(index - m_length + 1);
+		resize(index + 1);
+	}
+	m_storage[index] = Element;
+	return index;
+}
+
+
 
 template<typename ValueType>
 bool unsafe_vector<ValueType>::remove_at(int64_t Index)
@@ -320,12 +332,10 @@ bool unsafe_vector<ValueType>::remove_at(int64_t Index)
 
 	// todo destruct removed element if necessary?
 
-	ValueType* Data = reinterpret_cast<ValueType*>(m_storage);
 	m_length--;
-	for (size_t k = Index; k < m_length; ++k)
-	{
-		Data[k] = Data[k+1];
-	}
+	for (size_t k = Index; k < m_length; ++k) 
+		m_storage[k] = m_storage[k+1];
+
 	return true;
 }
 
@@ -351,8 +361,7 @@ bool unsafe_vector<ValueType>::swap_remove(int64_t Index, int64_t& SwappedIndexO
 		return true;
 	}
 
-	ValueType* Data = reinterpret_cast<ValueType*>(m_storage);
-	Data[Index] = std::move( Data[m_length-1] );
+	m_storage[Index] = std::move(m_storage[m_length-1] );
 	SwappedIndexOut = m_length - 1;
 	m_length--;
 	return true;
@@ -365,8 +374,7 @@ bool unsafe_vector<ValueType>::pop_back(ValueType& ValueOut)
 
 	if (m_length == 0)
 		return false;
-	ValueType* Data = reinterpret_cast<ValueType*>(m_storage);
-	ValueOut = std::move(Data[m_length-1]);
+	ValueOut = std::move(m_storage[m_length-1]);
 	m_length--;
 	return true;
 }
@@ -383,23 +391,23 @@ void unsafe_vector<ValueType>::pop_back()
 template<typename ValueType>
 ValueType* unsafe_vector<ValueType>::raw_pointer()
 {
-	return reinterpret_cast<ValueType*>(m_storage);
+	return m_storage;
 }
 template<typename ValueType>
 const ValueType* unsafe_vector<ValueType>::raw_pointer() const
 {
-	return reinterpret_cast<ValueType*>(m_storage);
+	return m_storage;
 }
 
 template<typename ValueType>
 ValueType* unsafe_vector<ValueType>::raw_pointer(int64_t index)
 {
-	return &reinterpret_cast<ValueType*>(m_storage)[index];
+	return &m_storage[index];
 }
 template<typename ValueType>
 const ValueType* unsafe_vector<ValueType>::raw_pointer(int64_t index) const
 {
-	return &reinterpret_cast<ValueType*>(m_storage)[index];
+	return &m_storage[index];
 }
 
 
@@ -411,7 +419,7 @@ void unsafe_vector<ValueType>::reserve(size_t num_elements)
 
 	if (m_length == 0)
 	{
-		m_storage = (m_external_allocator) ? m_external_allocator->allocate(reserve_bytes) : gs_default_allocator::allocate(reserve_bytes);
+		m_storage = (m_external_allocator) ? (ValueType*)m_external_allocator->allocate(reserve_bytes) : (ValueType*)gs_default_allocator::allocate(reserve_bytes);
 		m_allocated_length = num_elements;
 		default_construct_if_necessary(0);
 	}
@@ -420,7 +428,7 @@ void unsafe_vector<ValueType>::reserve(size_t num_elements)
 		unsigned char* tmp_storage = (m_external_allocator) ? m_external_allocator->allocate(reserve_bytes) : gs_default_allocator::allocate(reserve_bytes);
 		memcpy(tmp_storage, m_storage, m_length * sizeof(ValueType));
 		release_memory();
-		m_storage = tmp_storage;
+		m_storage = (ValueType*)tmp_storage;
 		m_allocated_length = num_elements;
 		default_construct_if_necessary((int)m_length);
 	}
@@ -457,7 +465,7 @@ void unsafe_vector<ValueType>::resize(size_t num_elements, bool shrink_memory)
 	unsigned char* tmp_storage = (m_external_allocator) ? m_external_allocator->allocate(required_bytes) : gs_default_allocator::allocate(required_bytes);
 	memcpy(tmp_storage, m_storage, num_elements * sizeof(ValueType));
 	release_memory();
-	m_storage = tmp_storage;
+	m_storage = (ValueType*)tmp_storage;
 	m_allocated_length = m_length = num_elements;
 }
 
@@ -477,9 +485,8 @@ void unsafe_vector<ValueType>::initialize(size_t num_elements, const ValueType& 
 {
 	if (m_length != num_elements)
 		resize(num_elements, false);
-	ValueType* typed_storage = reinterpret_cast<ValueType*>(m_storage);
 	for (size_t i = 0; i < num_elements; ++i)
-		typed_storage[i] = initial_value;
+		m_storage[i] = initial_value;
 }
 
 template<typename ValueType>
@@ -487,9 +494,8 @@ void unsafe_vector<ValueType>::initialize(size_t num_elements, const ValueType* 
 {
 	if (m_length != num_elements)
 		resize(num_elements, false);
-	ValueType* typed_storage = reinterpret_cast<ValueType*>(m_storage);
 	for (size_t i = 0; i < num_elements; ++i)
-		typed_storage[i] = initial_values[i];
+		m_storage[i] = initial_values[i];
 }
 
 template<typename ValueType>
@@ -498,9 +504,8 @@ void unsafe_vector<ValueType>::initialize(size_t num_elements, const IndexableTy
 {
 	if (m_length != num_elements)
 		resize(num_elements, false);
-	ValueType* typed_storage = reinterpret_cast<ValueType*>(m_storage);
 	for (size_t i = 0; i < num_elements; ++i)
-		typed_storage[i] = initial_values[i];
+		m_storage[i] = initial_values[i];
 }
 
 
@@ -522,11 +527,11 @@ void unsafe_vector<ValueType>::release_memory()
 	{
 		if (m_external_allocator)
 		{
-			m_external_allocator->free(m_storage);
+			m_external_allocator->free((unsigned char*)m_storage);
 		}
 		else
 		{
-			gs_default_allocator::free(m_storage);
+			gs_default_allocator::free((unsigned char*)m_storage);
 		}
 
 		m_storage = nullptr;
@@ -539,10 +544,8 @@ void unsafe_vector<ValueType>::default_construct_if_necessary(int start_index)
 {
 	if (std::is_trivially_copyable<ValueType>()) return;
 
-	ValueType* typed_storage = reinterpret_cast<ValueType*>(m_storage);
-	ValueType* cur = &typed_storage[start_index];
-	for (size_t k = start_index; k < m_allocated_length; ++k)
-	{
+	ValueType* cur = &m_storage[start_index];
+	for (size_t k = start_index; k < m_allocated_length; ++k) {
 		new (cur) ValueType();
 		cur++;
 	}
@@ -553,10 +556,8 @@ void unsafe_vector<ValueType>::destruct_if_necessary(int start_index)
 {
 	if (std::is_trivially_copyable<ValueType>()) return;
 
-	ValueType* typed_storage = reinterpret_cast<ValueType*>(m_storage);
-	ValueType* cur = &typed_storage[start_index];
-	for (size_t k = start_index; k < m_allocated_length; ++k)
-	{
+	ValueType* cur = &m_storage[start_index];
+	for (size_t k = start_index; k < m_allocated_length; ++k) {
 		(*cur).~ValueType();
 		cur++;
 	}
@@ -614,9 +615,8 @@ void unsafe_vector<ValueType>::apply_grow_policy(int64_t new_elements)
 template<typename ValueType>
 bool unsafe_vector<ValueType>::contains(const ValueType& Element) const
 {
-	const ValueType* Data = reinterpret_cast<ValueType*>(m_storage);
 	for (size_t k = 0; k < m_length; ++k) {
-		if (Data[k] == Element) return true;
+		if (m_storage[k] == Element) return true;
 	}
 	return false;
 }
@@ -624,9 +624,8 @@ bool unsafe_vector<ValueType>::contains(const ValueType& Element) const
 template<typename ValueType>
 int64_t unsafe_vector<ValueType>::index_of(const ValueType& Element) const
 {
-	const ValueType* Data = reinterpret_cast<ValueType*>(m_storage);
 	for (size_t k = 0; k < m_length; ++k) {
-		if (Data[k] == Element) return k;
+		if (m_storage[k] == Element) return k;
 	}
 	return -1;
 }
@@ -636,8 +635,7 @@ const_buffer_view<ValueType> unsafe_vector<ValueType>::get_view() const
 {
 	if (m_storage == nullptr)
 		return const_buffer_view<ValueType>();
-	const ValueType* Data = reinterpret_cast<ValueType*>(m_storage);
-	return const_buffer_view<ValueType>(Data, m_length);
+	return const_buffer_view<ValueType>(m_storage, m_length);
 }
 
 template<typename ValueType>
