@@ -33,6 +33,11 @@ struct RealConstants<float>
 	static constexpr float Pi() { return 3.14159265358979323846f; }
 	static constexpr float RadToDeg() { return 180.0f / Pi(); }
 	static constexpr float DegToRad() { return Pi() / 180.0f; }
+
+	static constexpr float Sqrt2() { return 1.4142135623730950488016887242097f; }
+	static constexpr float InvSqrt2() { return 1.0f / Sqrt2(); }
+	static constexpr float Sqrt3() { return 1.7320508075688772935274463415059f; }
+	static constexpr float InvSqrt3() { return 1.0f / Sqrt3(); }
 };
 
 template<>
@@ -55,6 +60,11 @@ struct RealConstants<double>
 	static constexpr double Pi() { return 3.1415926535897932384626433832795; }
 	static constexpr double RadToDeg() { return 180.0 / Pi(); }
 	static constexpr double DegToRad() { return Pi() / 180.0; }
+
+	static constexpr double Sqrt2() { return 1.4142135623730950488016887242097; }
+	static constexpr double InvSqrt2() { return 1.0 / Sqrt2(); }
+	static constexpr double Sqrt3() { return 1.7320508075688772935274463415059; }
+	static constexpr double InvSqrt3() { return 1.0 / Sqrt3(); }
 };
 
 template<typename RealType>
