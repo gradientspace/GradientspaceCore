@@ -18,7 +18,7 @@ bool packed_int_lists::AppendList(int ListID, const_buffer_view<int> Items)
 	gs_debug_assert(ListPointers[ListID] == -1);
 	if (ListPointers[ListID] != -1)
 		return false;
-	int NumItems = Items.size();
+	int NumItems = (int)Items.size();
 	if (NumItems == 0)
 		return false;
 

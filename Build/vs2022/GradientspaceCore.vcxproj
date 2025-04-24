@@ -119,6 +119,7 @@
     <ClInclude Include="..\..\Public\Image\*.h" />
     <ClInclude Include="..\..\Public\Intersection\*.h" />
     <ClInclude Include="..\..\Public\Math\*.h" />
+    <ClInclude Include="..\..\Public\Mapping\*.h" />
     <ClInclude Include="..\..\Public\Mesh\*.h" />
     <ClInclude Include="..\..\Public\Sampling\*.h" />
     <ClInclude Include="..\..\Public\Spatial\*.h" />
