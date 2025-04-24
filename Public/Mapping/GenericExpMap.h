@@ -122,7 +122,7 @@ public:
 
             gs_debug_assert(Queue.Contains(&g) == false);
 
-            Queue.Enqueue(&g, g.graph_distance);
+            Queue.Enqueue(&g, (float)g.graph_distance);
 
             gs_debug_assert(Queue.Contains(&g));
         }
@@ -266,17 +266,17 @@ protected:
             if (nbr.frozen)
                 continue;
 
-            float parent_nbr_dist = parentDist + parentPos.Distance(nbr.Position);
+            double parent_nbr_dist = parentDist + parentPos.Distance(nbr.Position);
             if (Queue.Contains(&nbr)) {
                 if (parent_nbr_dist < nbr.graph_distance) {
                     nbr.ParentIndex = parentNode->Index;
                     nbr.graph_distance = parent_nbr_dist;
-                    Queue.UpdatePriority(&nbr, nbr.graph_distance);
+                    Queue.UpdatePriority(&nbr, (float)nbr.graph_distance);
                 }
             } else {
                 nbr.ParentIndex = parentNode->Index;
                 nbr.graph_distance = parent_nbr_dist;
-                Queue.Enqueue(&nbr, nbr.graph_distance);
+                Queue.Enqueue(&nbr, (float)nbr.graph_distance);
             }
         }
     }
