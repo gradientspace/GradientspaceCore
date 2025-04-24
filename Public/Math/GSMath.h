@@ -211,6 +211,13 @@ ValueType Lerp(ValueType A, ValueType B, ValueType Alpha)
 	return ((ValueType)1-Alpha)*A + (Alpha*B);
 }
 
+template<typename VectorType, typename ValueType>
+VectorType Lerp(VectorType A, VectorType B, ValueType Alpha)
+{
+	return ((ValueType)1 - Alpha) * A + (Alpha * B);
+}
+
+
 template<typename RealType> RealType Abs(RealType Value) { return std::abs(Value); }
 template<typename RealType> RealType FAbs(RealType Value) { return std::fabs(Value); }
 template<typename RealType> RealType FMod(RealType X, RealType Y) { return std::fmod(X, Y); }

@@ -65,6 +65,9 @@ public:
 	inline const TriVtxColors& GetTriVtxColors(int TriIndex) const;
 	inline void SetTriVtxColors(int TriIndex, const TriVtxColors& NewUVs);
 
+	inline Vector3d ComputeTriNormal(int TriIndex, bool bReverseOrientation = false) const;
+	inline Vector3d ComputeTriCentroid(int TriIndex) const;
+
 	bool Store(GS::ISerializer& Serializer) const;
 	bool Restore(GS::ISerializer& Serializer);
 	constexpr const char* SerializeVersionString() const { return "DenseMesh_Version"; }
@@ -160,6 +163,21 @@ const TriVtxColors& DenseMesh::GetTriVtxColors(int Index) const
 void DenseMesh::SetTriVtxColors(int TriIndex, const TriVtxColors& NewColor)
 {
 	TriVertexColors.set_value(TriIndex, NewColor);
+}
+
+
+Vector3d DenseMesh::ComputeTriNormal(int TriIndex, bool bReverseOrientation) const
+{
+	Index3i TriV = Triangles[TriIndex];
+	return (bReverseOrientation) ? 
+		GS::Normal(Positions[TriV.B], Positions[TriV.A], Positions[TriV.C]) 
+		: GS::Normal(Positions[TriV.A], Positions[TriV.B], Positions[TriV.C]);
+}
+
+Vector3d DenseMesh::ComputeTriCentroid(int TriIndex) const
+{
+	Index3i TriV = Triangles[TriIndex];
+	return (Positions[TriV.A] + Positions[TriV.B] + Positions[TriV.C]) / 3.0;
 }
 
 

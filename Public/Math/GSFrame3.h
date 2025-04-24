@@ -53,6 +53,7 @@ struct Frame3
 	ResultOrFail<Vector3<RealType>> FindRayPlaneIntersection(const Ray3<RealType>& Ray, int NormalAxisIndex) const;
 
 	void AlignAxis(int AxisIndex, const Vector3<RealType>& ToDirection);
+	void ConstrainedAlignAxis(int AxisIndex, const Vector3<RealType>& ToDirection, const Vector3<RealType>& AroundAxis);
 
 	// Unreal Engine casting/conversion
 #ifdef GS_ENABLE_UE_TYPE_COMPATIBILITY
@@ -171,6 +172,16 @@ template<typename RealType>
 void Frame3<RealType>::AlignAxis(int AxisIndex, const Vector3<RealType>& ToDirection)
 {
 	Quaterniond AlignRotation(GetAxis(AxisIndex), ToDirection.Normalized() );
+	this->Rotation = AlignRotation * Rotation;
+}
+
+
+template<typename RealType>
+void Frame3<RealType>::ConstrainedAlignAxis(int AxisIndex, const Vector3<RealType>& ToDirection, const Vector3<RealType>& AroundAxis)
+{
+	Vector3<RealType> Axis = GetAxis(AxisIndex);
+	RealType AngleDeg = PlaneAngleSignedDeg(Axis, ToDirection, AroundAxis);
+	Quaternion<RealType> AlignRotation(AroundAxis, AngleDeg, true);
 	this->Rotation = AlignRotation * Rotation;
 }
 

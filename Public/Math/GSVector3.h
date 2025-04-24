@@ -315,6 +315,23 @@ inline Vector3<RealType> Normal(const Vector3<RealType>& A, const Vector3<RealTy
 }
 
 
+template<typename RealType>
+inline RealType PlaneAngleSignedDeg(Vector3<RealType> From, Vector3<RealType> To, const Vector3<RealType>& PlaneNormal)
+{
+	From = From - From.Dot(PlaneNormal) * PlaneNormal;
+	To = To - To.Dot(PlaneNormal) * PlaneNormal;
+	From.Normalize();
+	To.Normalize();
+	Vector3<RealType> c = Cross(From, To);
+	if (c.SquaredLength() < RealMath<RealType>::ZeroTolerance()) {        // vectors are parallel
+		return (From.Dot(To) < 0) ? (RealType)180 : (RealType)0;
+	}
+	RealType Sign = GS::Sign(c.Dot(PlaneNormal));
+	RealType Angle = Sign * VectorAngleDeg(From, To);
+	return Angle;
+}
+
+
 } // end namespace GS
 
 
