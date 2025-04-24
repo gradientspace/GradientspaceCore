@@ -14,15 +14,25 @@
 //#include "Windows/HideWindowsPlatformTypes.h"
 //#endif
 
+#ifdef __linux__
+#define PLATFORM_BREAK() (__builtin_trap())
+#else
 // seems like this is all we need on windows, and does not bring in windows.h garbage
 #include <intrin.h>
 #define PLATFORM_BREAK() (__nop(), __debugbreak())
+#endif
 
 #define gs_debug_assert( expr )   { if (!(expr)) PLATFORM_BREAK(); }
 #define gs_runtime_assert( expr ) { if (!(expr)) PLATFORM_BREAK(); }
 
-#define GS_DISABLE_OPTIMIZATION __pragma(optimize("",off))
-#define GS_ENABLE_OPTIMIZATION __pragma(optimize("",on))
+#ifdef __linux__
+	// unclear if we can support this on linux...
+	#define GS_DISABLE_OPTIMIZATION
+	#define GS_ENABLE_OPTIMIZATION
+#else
+	#define GS_DISABLE_OPTIMIZATION __pragma(optimize("",off))
+	#define GS_ENABLE_OPTIMIZATION __pragma(optimize("",on))
+#endif
 
 
 #ifdef GSUE_LINKING_INSIDE_UE

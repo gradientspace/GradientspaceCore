@@ -2,6 +2,7 @@
 #pragma once
 
 #include "GradientspacePlatform.h"
+#include <string>		// for std::hash ?
 
 namespace GS
 {

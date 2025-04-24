@@ -39,7 +39,7 @@ void MemorySerializer::BeginWrite()
 }
 
 
-GS_DISABLE_OPTIMIZATION
+//GS_DISABLE_OPTIMIZATION
 bool MemorySerializer::WriteData(const char* key, const void* buffer, size_t num_bytes)
 {
 	gs_debug_assert(is_reading == false);
@@ -49,7 +49,7 @@ bool MemorySerializer::WriteData(const char* key, const void* buffer, size_t num
 
 	size_t cur_size = data.size();
 
-	size_t key_bytes = strnlen_s(key, 128);
+	size_t key_bytes = strnlen(key, 128);
 	gs_debug_assert(key_bytes < 128);		// otherwise key is truncated
 
 	size_t total_bytes = sizeof(size_t) + key_bytes + 1 + sizeof(size_t) + num_bytes;
@@ -83,7 +83,7 @@ bool MemorySerializer::WriteData(const char* key, const void* buffer, size_t num
 
 	return true;
 }
-GS_ENABLE_OPTIMIZATION
+//GS_ENABLE_OPTIMIZATION
 
 
 void MemorySerializer::BeginRead()
@@ -116,7 +116,7 @@ bool MemorySerializer::ReadData(const char* key, size_t num_bytes, void* buffer)
 	cur_ptr += key_len;
 	read_index += key_len;
 
-	size_t key_bytes = strnlen_s(key, 128);
+	size_t key_bytes = strnlen(key, 128);
 	if (validate_keys)
 	{
 		gs_debug_assert(key_bytes == key_len);

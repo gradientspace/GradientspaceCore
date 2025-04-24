@@ -190,7 +190,8 @@ template<typename ValueType>
 unsafe_vector<ValueType>& unsafe_vector<ValueType>::operator=(const unsafe_vector& copy)
 {
 	resize(copy.size());
-	memcpy((void*)m_storage, (void*)copy.m_storage, m_length * sizeof(ValueType));
+	size_t required_bytes = m_length * sizeof(ValueType);
+	memcpy_s((void*)m_storage, required_bytes, (void*)copy.m_storage, required_bytes);
 	return *this;
 }
 
@@ -426,7 +427,8 @@ void unsafe_vector<ValueType>::reserve(size_t num_elements)
 	else
 	{
 		unsigned char* tmp_storage = (m_external_allocator) ? m_external_allocator->allocate(reserve_bytes) : gs_default_allocator::allocate(reserve_bytes);
-		memcpy(tmp_storage, m_storage, m_length * sizeof(ValueType));
+		size_t copy_bytes = m_length * sizeof(ValueType);
+		memcpy_s(tmp_storage, copy_bytes, m_storage, copy_bytes);
 		release_memory();
 		m_storage = (ValueType*)tmp_storage;
 		m_allocated_length = num_elements;
@@ -463,7 +465,7 @@ void unsafe_vector<ValueType>::resize(size_t num_elements, bool shrink_memory)
 	destruct_if_necessary((int)num_elements);
 	size_t required_bytes = num_elements * sizeof(ValueType);
 	unsigned char* tmp_storage = (m_external_allocator) ? m_external_allocator->allocate(required_bytes) : gs_default_allocator::allocate(required_bytes);
-	memcpy(tmp_storage, m_storage, num_elements * sizeof(ValueType));
+	memcpy_s(tmp_storage, required_bytes, m_storage, required_bytes);
 	release_memory();
 	m_storage = (ValueType*)tmp_storage;
 	m_allocated_length = m_length = num_elements;

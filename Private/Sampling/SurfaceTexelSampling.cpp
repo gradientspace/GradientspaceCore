@@ -87,7 +87,7 @@ void SurfaceTexelSampling::Build(ConstMeshView2d UVMesh, int ImageWidth, int Ima
 		Vector3d BaryCoords = UVTri.GetBaryCoords(TriNearestPoint);
 
 		Vector3d Pos3D = ComputeTriBaryPoint3DFunc(NearestTID, BaryCoords);
-		if (!isfinite(Pos3D.X)) {
+		if (!std::isfinite(Pos3D.X)) {
 			//__debugbreak();
 			BaryCoords.X = 1; BaryCoords.Y = BaryCoords.Z = 0;
 			Pos3D = ComputeTriBaryPoint3DFunc(NearestTID, BaryCoords);

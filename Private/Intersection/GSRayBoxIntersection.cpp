@@ -18,7 +18,7 @@ static bool fast_ray_box(const Ray3d& Ray, const AxisBox3d& Box, double& RayHitP
 	double tmin = 0.0, tmax = (double)Mathf::SafeMaxValue();
 
 	for (int d = 0; d < 3; ++d) {
-		bool sign = signbit(ray_dir_inv[d]);
+		bool sign = std::signbit(ray_dir_inv[d]);
 		double bmin = box_corners[sign][d];
 		double bmax = box_corners[!sign][d];
 

@@ -10,7 +10,6 @@
 #include "IntVectorTypes.h"
 #endif
 
-#include <xhash>  // works for std::hash defined at bottom? or is <unordered_set> required?
 
 namespace GS
 {

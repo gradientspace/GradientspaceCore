@@ -14,7 +14,6 @@
 #include "IntTypes.h"
 #endif
 
-#include <xhash>  // for std::hash defined at bottom
 
 namespace GS
 {
