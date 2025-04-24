@@ -1,0 +1,18 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "windows-x64-vs2022",
+      "displayName": "Windows x64 vs2022",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "build/cmake-win64-vs2022",
+	  "architecture": {
+		"value": "x64",
+		"strategy": "external"
+	  },	  
+      "cacheVariables": {
+		"CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}"
+      }
+    }
+  ]
+}

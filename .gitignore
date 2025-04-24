@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# exclude any temp directories created in top-level /build/
+[Bb]uild/
+![Bb]uild/vs2022
+
 # User-specific files
 *.rsuser
 *.suo
