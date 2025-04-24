@@ -1,0 +1,3 @@
+build/*
+!build/do_not_delete.txt
+install
