@@ -73,7 +73,6 @@ namespace GS
 			int NumEdges;
 			const int* OneRingEdges = VertexEdges.GetListItemsUnsafe(VertexID, NumEdges);
 			OneRingTrisTmp.reserve(NumEdges);
-			int j = 0;
 			for (int k = 0; k < NumEdges; ++k) {
 				int eid = OneRingEdges[k];
 				const MeshTopology::Edge& Edge = Edges[eid];

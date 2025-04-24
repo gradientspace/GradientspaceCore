@@ -441,7 +441,7 @@ public:
 	template<typename GenericMeshAttributeType>
 	MeshAttributeName AddVertexAttributeOfType(const MeshAttributeName& BaseName, MeshAttributeHeader Header, int InitialVertexCount)
 	{
-		MeshAttributeName UniqueName = MakeUniqueVertexAttributeName(VertexAttributes, BaseName);
+		MeshAttributeName UniqueName = MakeUniqueVertexAttributeName(BaseName);
 		GenericMeshAttributeType* Attrib = new GenericMeshAttributeType(UniqueName, Header, InitialVertexCount);
 		VertexAttributes.push_back(Attrib);
 		return UniqueName;
@@ -450,7 +450,7 @@ public:
 	template<typename GenericMeshAttributeType>
 	MeshAttributeName AddTriangleAttribute(const MeshAttributeName& BaseName, MeshAttributeHeader Header, int InitialTriCount)
 	{
-		MeshAttributeName UniqueName = MakeUniqueTriangleAttributeName(TriangleAttributes, BaseName);
+		MeshAttributeName UniqueName = MakeUniqueTriangleAttributeName(BaseName);
 		GenericMeshAttributeType* Attrib = new GenericMeshAttributeType(UniqueName, Header, InitialTriCount);
 		TriangleAttributes.push_back(Attrib);
 		return UniqueName;

@@ -25,7 +25,7 @@ template<typename RealType>
 class AxisBoxTree2
 {
 public:
-	using BoxType = typename AxisBox2<RealType>;
+	using BoxType = typename GS::AxisBox2<RealType>;
 
 	void Build(
 		int32_t MaxBoxID, 

@@ -32,7 +32,7 @@ FileTextWriter FileTextWriter::OpenFile(const std::string& FilePath)
 {
 	FileTextWriter Result;
 	Result.out_stream.open(FilePath, std::ofstream::out | std::ofstream::trunc);
-	return std::move(Result);
+	return Result;
 }
 
 FileTextWriter::FileTextWriter()

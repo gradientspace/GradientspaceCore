@@ -43,7 +43,7 @@ static double falloff_curve(double t) {
     return (t*t*t) * ( (6.0*t - 15.0)*t + 10.0 ); 
 }
 
-static double grad3(int hash, double x, double y, double z) 
+[[maybe_unused]] static double grad3(int hash, double x, double y, double z) 
 {
     int h = hash & 15;              // extract low-order 4 bits
     double u = (h < 8) ? x : y;     // convert into 12 directions
@@ -95,14 +95,15 @@ double GS::PerlinNoise2D(const Vector2d& Pos)
     using namespace PerlinStuff;
     // https://gpfault.net/posts/perlin-noise.txt.html
 
+    // this function is not implemented yet...don't quite understand it...
+    abort();
+
+#if 0
     Vector2d p0 = Vector2d(floor(Pos.X), floor(Pos.Y));
     Vector2d p1 = p0 + Vector2d(1.0, 0.0);
     Vector2d p2 = p0 + Vector2d(0.0, 1.0);
     Vector2d p3 = p0 + Vector2d(1.0, 1.0);
 
-    // this function is not implemented yet...don't quite understand it...
-    abort();
-#if 0
     Vector2d g0 = grad2(p0);
     Vector2d g1 = grad2(p1);
     Vector2d g2 = grad2(p2);

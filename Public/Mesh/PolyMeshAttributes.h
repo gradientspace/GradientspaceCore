@@ -58,7 +58,7 @@ struct IndexedAttributeBase
 	{
 		uint8_t LastSetIndex = NumSets - 1;
 		SetCounts[LastSetIndex] += NumNewElements;
-		int StartIndex = (int)Values.size() = SetOffsets[LastSetIndex];
+		int StartIndex = (int)Values.size() - SetOffsets[LastSetIndex];
 		Values.grow(NumNewElements);
 		return StartIndex;
 	}

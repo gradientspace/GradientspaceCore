@@ -55,7 +55,7 @@ struct Ray3
 	}
 
 	RealType Distance(const Vector3<RealType>& Point) const {
-		return GS::Sqrt(DistanceSquared);
+		return GS::Sqrt(DistanceSquared(Point));
 	}
 
 	//! float/double conversion operator

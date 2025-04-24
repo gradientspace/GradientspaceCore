@@ -172,10 +172,9 @@ void GS::AxisBoxTree2<RealType>::Build(int32_t MaxBoxID, FunctionRef<bool(int Bo
 	// trivial case - no tree, just a single box
 	if (NumBoxes <= NumChildrenInLeaf) {
 		LeafBoxLists.reserve(NumBoxes);
-		int start_index = 0;
 		for (int j = 0; j < NumBoxes; j++) {
 			SourceBox& SrcBox = BoxesList[j];
-			int new_index = (int)LeafBoxLists.add_ref(SourceBox2{ SrcBox.Box, SrcBox.BoxID });
+			[[maybe_unused]] int new_index = (int)LeafBoxLists.add_ref(SourceBox2{ SrcBox.Box, SrcBox.BoxID });
 		}
 		this->RootBounds = CombinedBox;
 		this->RootIndex.Index = 0;
@@ -225,7 +224,7 @@ void GS::AxisBoxTree2<RealType>::Build(int32_t MaxBoxID, FunctionRef<bool(int Bo
 		}
 	}
 	int NumTreeNodes = (int)GroupTree.size();
-	gs_debug_assert(TotalLeafItemCount == NumBoxes);
+	gs_debug_assert(NumLeafNodes > 0 && TotalLeafItemCount == NumBoxes);
 	
 	// reassign linear indices to internal nodes. Just do this in StartIndex as we don't need that anymore, for internal nodes
 	int LinearIndex = 0;
@@ -237,7 +236,6 @@ void GS::AxisBoxTree2<RealType>::Build(int32_t MaxBoxID, FunctionRef<bool(int Bo
 
 	// is this just BoxesList but in a different order?
 	LeafBoxLists.reserve(TotalLeafItemCount);		
-	int LinearBoxIndex = 0;
 	for (int i = 0; i < NumTreeNodes; ++i) {
 		BoxGroup& Group = GroupTree[i];
 		if (!Group.IsLeaf())
@@ -247,7 +245,7 @@ void GS::AxisBoxTree2<RealType>::Build(int32_t MaxBoxID, FunctionRef<bool(int Bo
 		for (int j = Group.StartIndex; j <= Group.EndIndex; j++) 
 		{
 			SourceBox& SrcBox = BoxesList[j];
-			int new_index = (int)LeafBoxLists.add_ref(SourceBox2{ SrcBox.Box, SrcBox.BoxID });
+			[[maybe_unused]] int new_index = (int)LeafBoxLists.add_ref(SourceBox2{ SrcBox.Box, SrcBox.BoxID });
 		}
 		Group.StartIndex = start_index; Group.EndIndex = count;
 	}
@@ -426,7 +424,7 @@ DistanceResult2<RealType> GS::AxisBoxTree2<RealType>::PointDistanceQuery(
 	//unsafe_vector<StackBox> stack;
 	//stack.reserve(32);
 
-	int NumBoxTested = 0, NumTriTested = 0;
+	[[maybe_unused]] int NumBoxTested = 0, NumTriTested = 0;
 
 	RealType MaxDistSqr = Options.MaxDistance * Options.MaxDistance;
 	RealType MinDistSqr = RootBounds.DistanceSquared(QueryPoint);
