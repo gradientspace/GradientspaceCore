@@ -229,7 +229,7 @@ void Matrix2<RealType>::SetToRotationRad(RealType angleRad) {
 }
 template<typename RealType>
 void Matrix2<RealType>::SetToRotationDeg(RealType angleDeg) {
-	SetToRotationRad(GS::DegToRad() * angleDeg);
+	SetToRotationRad(GS::RealMath<RealType>::DegToRad() * angleDeg);
 }
 
 template<typename RealType>

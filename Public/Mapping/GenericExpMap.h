@@ -104,6 +104,7 @@ public:
     bool Validate()
     {
         // todo - check that neighbours and nodes are all initialized
+        return true;
     }
 
 
