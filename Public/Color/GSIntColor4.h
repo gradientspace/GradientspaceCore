@@ -54,6 +54,24 @@ struct IntColor4
 	constexpr IntColor4(IntType r, IntType g, IntType b, IntType a);
 	constexpr IntColor4(const IntType* Values, uint8_t NumValues);
 
+	template<typename RealType>
+	explicit IntColor4<IntType>(const Vector3<RealType>& Vec)
+	{
+		R = (uint8_t)GS::Clamp((int)(Vec.X * (RealType)255), 0, 255);
+		G = (uint8_t)GS::Clamp((int)(Vec.Y * (RealType)255), 0, 255);
+		B = (uint8_t)GS::Clamp((int)(Vec.Z * (RealType)255), 0, 255);
+		A = 255;
+	}
+
+	template<typename RealType>
+	explicit IntColor4<IntType>(const Vector4<RealType>& Vec)
+	{
+		R = (uint8_t)GS::Clamp((int)(Vec.X * (RealType)255), 0, 255);
+		G = (uint8_t)GS::Clamp((int)(Vec.Y * (RealType)255), 0, 255);
+		B = (uint8_t)GS::Clamp((int)(Vec.Z * (RealType)255), 0, 255);
+		A = (uint8_t)GS::Clamp((int)(Vec.W * (RealType)255), 0, 255);
+	}
+
 	IntType& operator[](int Index) {
 		return RGBA[Index];
 	}
