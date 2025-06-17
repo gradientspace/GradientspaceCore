@@ -108,7 +108,7 @@ public:
     }
 
 
-    void ComputeToMaxDistance(Frame3d seedFrame, Index3i SeedNbrs, double MaxGraphDistance)
+    void ComputeToMaxDistance(Frame3d seedFrame, Index3i SeedNbrs, double MaxUVDistance, double MaxGraphDistanceMultiplier = 1.5)
     {
         reset_for_compute();
         SeedFrame = seedFrame;
@@ -132,24 +132,28 @@ public:
         {
             GraphNode* g = Queue.Dequeue();
             cur_max_graph_distance = GS::Max(g->graph_distance, cur_max_graph_distance);
-            if (cur_max_graph_distance > MaxGraphDistance )
-                return;
-
+            
             if (g->ParentIndex != -1) {
                 update_uv_upwind_expmap(g);
             }
 
-            double uv_dist_sqr = g->uv.SquaredLength();
-            if (uv_dist_sqr > cur_max_uv_distance)
-                cur_max_uv_distance = uv_dist_sqr;
+            double uv_dist = g->uv.Length();
+            if (uv_dist > cur_max_uv_distance)
+                cur_max_uv_distance = uv_dist;
 
             g->frozen = true;
+
+            // if we went past UV radius, don't propagate forward from this point
+            if (uv_dist > MaxUVDistance)
+                continue;
+
+            // catch runaway computation
+            if (g->graph_distance > MaxUVDistance*MaxGraphDistanceMultiplier)
+                continue;
 
             // recompute nbr distances and insert or update in queue
             update_neighbours(g);
         }
-
-        cur_max_uv_distance = GS::Sqrt(cur_max_uv_distance);
     }
 
 
