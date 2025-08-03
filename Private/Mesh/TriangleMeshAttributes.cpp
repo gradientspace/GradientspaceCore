@@ -1,7 +1,18 @@
 // Copyright Gradientspace Corp. All Rights Reserved.
 #include "Mesh/TriangleMeshAttributes.h"
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable:4996) // disable secure-crt warnings for this file
+#endif
+
 using namespace GS;
+
+GS::MeshAttributeName::MeshAttributeName(const char* UseName, uint8_t UseIndex) {
+	strncpy(&BaseName[0], UseName, 14);
+	Length = (uint8_t)strnlen(BaseName.data(), 14);
+	Index = UseIndex;
+}
 
 GS::MeshAttributeName GS::MeshAttributeName::Normal(uint8_t Index)
 {
@@ -57,3 +68,9 @@ GS::MeshAttributeHeader GS::MeshAttributeHeader::Material()
 {
 	return MeshAttributeHeader(1, sizeof(uint8_t));
 }
+
+
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif

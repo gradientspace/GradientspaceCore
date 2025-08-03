@@ -23,11 +23,7 @@ struct GRADIENTSPACECORE_API MeshAttributeName
 	uint8_t Index = 0;
 	uint8_t Length = 0;
 
-	MeshAttributeName(const char* UseName, uint8_t UseIndex = 0) {
-		strncpy(&BaseName[0], UseName, 14);
-		Length = (uint8_t)strnlen(BaseName.data(), 14);
-		Index = UseIndex;
-	}
+	MeshAttributeName(const char* UseName, uint8_t UseIndex = 0);
 
 	bool SameBaseName(const MeshAttributeName& OtherName) const {
 		return Length == OtherName.Length && strncmp(BaseName.data(), OtherName.BaseName.data(), 14) == 0;

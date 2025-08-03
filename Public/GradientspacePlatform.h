@@ -24,6 +24,10 @@
 	#endif
 #endif
 
+// disable secure CRT warnings on Windows, because it warns about the std functions that work cross-platform
+#if defined(_WIN64)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 // disable some warnings (UE disables these warnings too)
 #pragma warning(disable: 4251)		// X needs to have dll-interface to be used by clients of class X. 
@@ -51,11 +55,6 @@
 // this will make mesh stuff use LHS coordinate system which is appropriate for unreal (ie triangle normals will come out correctly)
 #define GS_USE_LEFT_HANDED_COORDINATE_SYSTEM
 
-
-// disable secure CRT warnings on Windows, because it warns about the std functions that work cross-platform
-#if defined(_WIN64)
-	#define _CRT_SECURE_NO_WARNINGS
-#endif
 
 // standard library includes that we use everywhere
 #include <string.h>
