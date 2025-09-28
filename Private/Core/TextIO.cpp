@@ -66,3 +66,56 @@ void FileTextWriter::WriteEndOfLine()
 {
 	out_stream << std::endl;
 }
+
+
+
+
+
+
+FileTextReader::~FileTextReader()
+{
+	CloseFile();
+}
+
+FileTextReader FileTextReader::OpenFile(const std::string& FilePath)
+{
+	FileTextReader Result;
+
+	Result.FilePtr = fopen(FilePath.c_str(), "r");
+	//if (!FilePtr)
+	//	return false;
+	return Result;
+}
+
+FileTextReader::FileTextReader()
+{
+}
+
+bool FileTextReader::operator!() const
+{
+	return IsEndOfFile();
+}
+
+bool FileTextReader::IsOpen() const
+{
+	return (FilePtr != nullptr);
+}
+
+void FileTextReader::CloseFile()
+{
+	if (IsOpen()) {
+		fclose(FilePtr);
+		FilePtr = nullptr;
+	}
+}
+
+bool FileTextReader::IsEndOfFile() const
+{
+	return (FilePtr == nullptr) || feof(FilePtr);
+}
+
+bool FileTextReader::ReadLine(char* ToBuffer, int MaxCount)
+{
+	char* Result = fgets(ToBuffer, MaxCount, FilePtr);
+	return (Result != nullptr);
+}

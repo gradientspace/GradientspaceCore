@@ -61,4 +61,41 @@ protected:
 };
 
 
+
+
+
+
+
+class GRADIENTSPACECORE_API ITextReader
+{
+public:
+	virtual ~ITextReader() {}
+	virtual bool IsEndOfFile() const = 0;
+	virtual bool ReadLine(char* ToBuffer, int MaxCount) = 0;
+};
+
+class GRADIENTSPACECORE_API FileTextReader : public ITextReader
+{
+public:
+	~FileTextReader();
+	FileTextReader& operator=(FileTextReader&& copy) = default;
+	FileTextReader(FileTextReader&& moved) = default;
+
+	static FileTextReader OpenFile(const std::string& FilePath);
+
+	virtual bool IsEndOfFile() const override;
+	bool operator!() const;
+	bool IsOpen() const;
+	void CloseFile();
+
+	virtual bool ReadLine(char* ToBuffer, int MaxCount) override;
+
+protected:
+	FileTextReader();		// prevent external construction, only allow opening via static functions
+	FILE* FilePtr = nullptr;
+};
+
+
+
+
 }
