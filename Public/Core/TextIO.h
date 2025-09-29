@@ -3,6 +3,7 @@
 
 #include "GradientspacePlatform.h"
 
+#include <istream>
 #include <ostream>
 #include <fstream>
 #include <string>
@@ -73,6 +74,20 @@ public:
 	virtual bool IsEndOfFile() const = 0;
 	virtual bool ReadLine(char* ToBuffer, int MaxCount) = 0;
 };
+
+
+class GRADIENTSPACECORE_API StreamTextReader : public ITextReader
+{
+public:
+	StreamTextReader(std::istream& stream);
+
+	virtual bool IsEndOfFile() const override;
+	virtual bool ReadLine(char* ToBuffer, int MaxCount) override;
+
+protected:
+	std::istream& in_stream;
+};
+
 
 class GRADIENTSPACECORE_API FileTextReader : public ITextReader
 {

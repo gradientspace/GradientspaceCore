@@ -71,6 +71,23 @@ void FileTextWriter::WriteEndOfLine()
 
 
 
+StreamTextReader::StreamTextReader(std::istream& stream)
+	: in_stream(stream)
+{
+}
+
+bool StreamTextReader::IsEndOfFile() const
+{
+	return in_stream.eof();
+}
+bool StreamTextReader::ReadLine(char* ToBuffer, int MaxCount)
+{
+	in_stream.getline(ToBuffer, MaxCount);
+	return in_stream.good();
+}
+
+
+
 
 FileTextReader::~FileTextReader()
 {
